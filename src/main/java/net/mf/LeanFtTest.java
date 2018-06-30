@@ -26,7 +26,7 @@ public class LeanFtTest extends UnitTestClassBase {
     private static String BASE_URL = "http://nimbusserver.aos.com:7080";
     private static String USERNAME = "corndog";
     private static String PASSWORD = "Password12!";
-    private static String CONSUMER_KEY = "eci3dxmuzfdoqm4pw4ucgmo0n0u3udfiwoibpgtk";
+    private static String CONSUMER_KEY = "y5xcmzav2jrtcnulegq230zvrt3q1yniu0b1cipk";
 
     public LeanFtTest() {
         //Change this constructor to private if you supply your own public constructor
@@ -116,6 +116,8 @@ public class LeanFtTest extends UnitTestClassBase {
         System.out.println("Log out");
         appModel.openBankProjectHomePage().logoutLink().click();
         //browser.closeAllTabs();
+        browser.close();
+
 
     }
 
