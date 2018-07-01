@@ -26,7 +26,7 @@ public class LeanFtTest extends UnitTestClassBase {
     private static String BASE_URL = "http://nimbusserver.aos.com:7080";
     private static String USERNAME = "corndog";
     private static String PASSWORD = "Password12!";
-    private static String CONSUMER_KEY = "y5xcmzav2jrtcnulegq230zvrt3q1yniu0b1cipk";
+    private static String CONSUMER_KEY = "mneaqpzmjgc52lkpp1bypd3ooxntmz1g44eerv0g";
 
     public LeanFtTest() {
         //Change this constructor to private if you supply your own public constructor
