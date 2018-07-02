@@ -50,12 +50,17 @@ public class LeanFtTest extends UnitTestClassBase {
     @After
     public void tearDown() throws Exception {
     }
+    public void record() throws GeneralLeanFtException{
+        
+    }
 
     @Test
-    public void validateAccountCreation() throws GeneralLeanFtException, JSONException, ReportException {
+    public void validateAccountCreation() throws GeneralLeanFtException, JSONException, ReportException, IOException {
 
         String runLocal;
         Browser browser;
+        String bankName="obp-bank-y-gh";
+        String token = authenticate();
         String tags[] = {"flynn","corndog","gartner",""};
 
         // To execute the test as a local SRF test, execute the maven project using the following:
@@ -96,23 +101,28 @@ public class LeanFtTest extends UnitTestClassBase {
         appModel.openBankProjectLoginPage().passwordEditField().setValue(PASSWORD);
         appModel.openBankProjectLoginPage().loginButton().click();
 
-        Verify.contains(USERNAME, appModel.openBankProjectHomePage().logoutLink().getDisplayName());
+        Verify.contains(USERNAME, appModel.openBankProjectHomePage().logoutLink().getDisplayName(),"Verify the user is logged in correctly");
 
         // Create account
         String uuid = UUID.randomUUID().toString();
         System.out.println("Create a new account using: "+uuid);
        appModel.openBankProjectHomePage().createBankAccountLink().click();
 
-        appModel.openBankProjectCreateBankAccountPage().BankListBox().select("obp-bank-y-gh");
+        JSONObject bank = banks(token, bankName);
+        Reporter.startReportingContext(bank.getString("short_name"));
+        appModel.openBankProjectCreateBankAccountPage().BankListBox().select(bankName);
         appModel.openBankProjectCreateBankAccountPage().DesiredAccountIdEditField().setValue(uuid);
         appModel.openBankProjectCreateBankAccountPage().DesiredCurrencyEditField().setValue("USD");
         appModel.openBankProjectCreateBankAccountPage().DesiredInitialBalanceEditField().setValue("500");
         appModel.openBankProjectCreateBankAccountPage().createAccountButton().click();
+        Reporter.endReportingContext();
 
         System.out.println("Verify the account was created correctly");
         Reporter.startReportingContext("Validate Creation via API", "Validate the creation of the account utilizing the REST API's");
-        String token = authenticate();
+        token = authenticate();
         verifyAccount(token, uuid);
+        banks(token, "obp-bank-y-gh");
+        banks(token, "obp-bank-x-gh");
         Reporter.endReportingContext();
 
         System.out.println("Log out");
@@ -128,6 +138,9 @@ public class LeanFtTest extends UnitTestClassBase {
         //http://nimbusserver.aos.com:7080/my/logins/direct
         try {
 
+            System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
+            System.getProperties().put("http.proxyPort", "7201");
+            System.getProperties().put("http.proxySet", "true");
             URL url = new URL(BASE_URL+"/my/logins/direct");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);
@@ -179,12 +192,15 @@ public class LeanFtTest extends UnitTestClassBase {
         return token;
     }
 
-    public JSONObject verifyAccount(String token, String uuid) throws JSONException {
+    public JSONObject verifyAccount(String token, String uuid) throws JSONException, IOException {
+        System.out.println("\tVerify account now exists in system");
         // http://localhost:8080/RESTfulExample/json/product/get
         JSONObject json = null;
 
             try {
-
+                System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
+                System.getProperties().put("http.proxyPort", "7201");
+                System.getProperties().put("http.proxySet", "true");
                 URL url = new URL(BASE_URL+"/obp/v3.0.0/my/accounts");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
@@ -200,17 +216,18 @@ public class LeanFtTest extends UnitTestClassBase {
                         (conn.getInputStream())));
 
                 String output;
-                //System.out.println("Output from Server .... \n");
-                while ((output = br.readLine()) != null) {
-                    //System.out.println(output);
-                    json = new JSONObject(output);
+                System.out.println("Output from Server .... ");
+                output = br.readLine();
+//                while ((output = br.readLine()) != null) {
+//                    System.out.println(output);
+//                    json = new JSONObject(output);
                     //System.out.println("Number of accounts: "+json.getJSONArray("accounts").length());
 //                    for (int i =0; i<json.getJSONArray("accounts").length(); i++){
 //                        System.out.println("Account: "+json.getJSONArray("accounts").getJSONObject(i).getString("id"));
 //                    }
                     System.out.println("\tVerify account: "+uuid+ " was created");
-                    Verify.contains(uuid, json.toString());
-                }
+                    Verify.contains(uuid, output);
+//                }
 
                 conn.disconnect();
 
@@ -225,4 +242,53 @@ public class LeanFtTest extends UnitTestClassBase {
             }
             return json;
         }
+    public JSONObject banks(String token, String bank) throws JSONException {
+        // http://localhost:8080/RESTfulExample/json/product/get
+        JSONObject json = null;
+
+        try {
+            System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
+            System.getProperties().put("http.proxyPort", "7201");
+            System.getProperties().put("http.proxySet", "true");
+            //obp-bank-y-gh
+            URL url = new URL(BASE_URL+"/obp/v1.2.1/banks/"+bank);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Authorization","DirectLogin token="+token);
+
+            if (conn.getResponseCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : "
+                        + conn.getResponseCode());
+            }
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(
+                    (conn.getInputStream())));
+
+            String output;
+            //System.out.println("Output from Server .... \n");
+            while ((output = br.readLine()) != null) {
+                //System.out.println(output);
+                json = new JSONObject(output);
+                //System.out.println("Number of accounts: "+json.getJSONArray("accounts").length());
+//                    for (int i =0; i<json.getJSONArray("accounts").length(); i++){
+//                        System.out.println("Account: "+json.getJSONArray("accounts").getJSONObject(i).getString("id"));
+//                    }
+                System.out.println("\tBank: "+json.toString());
+            }
+
+            conn.disconnect();
+
+        } catch (MalformedURLException e) {
+
+            e.printStackTrace();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+        }
+        return json;
+    }
+
 }
