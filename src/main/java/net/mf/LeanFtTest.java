@@ -68,18 +68,18 @@ public class LeanFtTest extends UnitTestClassBase {
         }else {
             BrowserDescription bd = new BrowserDescription();
             //bd.setType(BrowserType.INTERNET_EXPLORER); //or: bd.set("type", BrowserType.INTERNET_EXPLORER) or: bd.set("type", "INTERNET_EXPLORER")
-            bd.setType(BrowserType.INTERNET_EXPLORER);
+            bd.setType(BrowserType.CHROME);
             bd.set("tags",tags);
             bd.set("version", "latest");
             bd.set("osType", "Windows");
             bd.set("osVersion", "10");
             bd.set("tunnelName", "flynn_tunnel");
             if (System.getenv("LFTRUNTIME_labs__srf__serverInfo__clientID") != null) {
-                tags[3]="remote";
+                tags[3]="cloud";
                 bd.set("testName", "Open Bank Project - SRF Cloud Execution");
                 Reporter.reportEvent("Executed Remotely","Executed this test using the SRF Cloud environments");
             }else{
-                tags[3]="cloud";
+                tags[3]="remote";
                 bd.set("testName","Open Bank Project - SRF Remote Execution");
                 Reporter.reportEvent("Executed in SRF Cloud","Executed this test using the SRF Cloud environments");
             }
