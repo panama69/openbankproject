@@ -37,7 +37,10 @@ public class LeanFtTest extends UnitTestClassBase {
     public static void setUpBeforeClass() throws Exception {
         instance = new LeanFtTest();
         globalSetup(LeanFtTest.class);
-        // clean test -DrunLocal=true
+
+        //This option was added for leveraging virtualized services since
+        //the VS was using proxy to handle the API requests.
+        // clean test -DuseProxy=true
         useProxy = System.getProperty("useProxy");
         System.out.println("Use proxy: "+useProxy);
     }
