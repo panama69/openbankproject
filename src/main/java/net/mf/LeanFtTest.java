@@ -23,6 +23,7 @@ import org.json.*;
 import java.util.UUID;
 
 public class LeanFtTest extends UnitTestClassBase {
+    private static String useProxy = "false";
     private static String BASE_URL = "http://nimbusserver.aos.com:7080";
     private static String USERNAME = "corndog";
     private static String PASSWORD = "Password12!";
@@ -36,6 +37,9 @@ public class LeanFtTest extends UnitTestClassBase {
     public static void setUpBeforeClass() throws Exception {
         instance = new LeanFtTest();
         globalSetup(LeanFtTest.class);
+        // clean test -DrunLocal=true
+        useProxy = System.getProperty("useProxy");
+        System.out.println("Use proxy: "+useProxy);
     }
 
     @AfterClass
@@ -51,7 +55,7 @@ public class LeanFtTest extends UnitTestClassBase {
     public void tearDown() throws Exception {
     }
     public void record() throws GeneralLeanFtException{
-
+        Browser browser = BrowserFactory.launch(BrowserType.CHROME);
 
     }
 
@@ -139,9 +143,11 @@ public class LeanFtTest extends UnitTestClassBase {
         //http://nimbusserver.aos.com:7080/my/logins/direct
         try {
 
-            //System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
-            //System.getProperties().put("http.proxyPort", "7201");
-            //System.getProperties().put("http.proxySet", "true");
+            if (useProxy != null && useProxy.contentEquals("true")) {
+                System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
+                System.getProperties().put("http.proxyPort", "7201");
+                System.getProperties().put("http.proxySet", "true");
+            }
             URL url = new URL(BASE_URL+"/my/logins/direct");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);
@@ -199,9 +205,11 @@ public class LeanFtTest extends UnitTestClassBase {
         JSONObject json = null;
 
             try {
-                //System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
-                //System.getProperties().put("http.proxyPort", "7201");
-                //System.getProperties().put("http.proxySet", "true");
+                if (useProxy != null && useProxy.contentEquals("true")) {
+                    System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
+                    System.getProperties().put("http.proxyPort", "7201");
+                    System.getProperties().put("http.proxySet", "true");
+                }
                 URL url = new URL(BASE_URL+"/obp/v3.0.0/my/accounts");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
@@ -248,9 +256,11 @@ public class LeanFtTest extends UnitTestClassBase {
         JSONObject json = null;
 
         try {
-            //System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
-            //System.getProperties().put("http.proxyPort", "7201");
-            //System.getProperties().put("http.proxySet", "true");
+            if (useProxy != null && useProxy.contentEquals("true")) {
+                System.getProperties().put("http.proxyHost", "nimbusclient.aos.com");
+                System.getProperties().put("http.proxyPort", "7201");
+                System.getProperties().put("http.proxySet", "true");
+            }
             //obp-bank-y-gh
             URL url = new URL(BASE_URL+"/obp/v1.2.1/banks/"+bank);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
